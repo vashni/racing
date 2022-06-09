@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"strconv"
 
 	"git.neds.sh/matty/entain/racing/proto/racing"
 )
@@ -66,7 +67,6 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 		clauses []string
 		args    []interface{}
 	)
-
 	if filter == nil {
 		return query, args
 	}
@@ -78,6 +78,12 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 			args = append(args, meetingID)
 		}
 	}
+
+	//filter to fetch the visible races.
+	if filter.IsVisible{
+		clauses = append(clauses, " visible = "+ strconv.FormatBool(filter.IsVisible))
+	}
+
 
 	if len(clauses) != 0 {
 		query += " WHERE " + strings.Join(clauses, " AND ")
