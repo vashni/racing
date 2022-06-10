@@ -14,6 +14,7 @@ service Racing {
 
 message ListRacesRequest {
   ListRacesRequestFilter filter = 1;
+  string orderBy = 2;
 }
 
 // Response to ListRaces call.
