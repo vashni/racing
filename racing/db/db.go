@@ -12,6 +12,12 @@ func (r *racesRepo) seed() error {
 		_, err = statement.Exec()
 	}
 
+	//resetting the stale data with new, to implement status field with open status
+	statement, err = r.db.Prepare(`Delete from races IF EXISTS`)
+	if err == nil {
+		_, err = statement.Exec()
+	}
+
 	for i := 1; i <= 100; i++ {
 		statement, err = r.db.Prepare(`INSERT OR IGNORE INTO races(id, meeting_id, name, number, visible, advertised_start_time) VALUES (?,?,?,?,?,?)`)
 		if err == nil {
