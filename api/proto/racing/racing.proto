@@ -8,12 +8,32 @@ import "google/api/annotations.proto";
 
 service Racing {
   // ListRaces returns a list of all races.
+  //{
+  //  "filter": {
+  //      "meetingIds":[10],
+  //      "isVisible":true
+  //  },
+  //  "orderBy":"id.desc"
+  //}
   rpc ListRaces(ListRacesRequest) returns (ListRacesResponse) {
     option (google.api.http) = { post: "/v1/list-races", body: "*" };
+  }
+  //GetRace returns the details of the given race.
+  //Usage:http://localhost:8000/v1/race/61
+  rpc GetRace(GetRaceRequest) returns (GetRaceResponse) {
+    option (google.api.http) = { get: "/v1/race/{id}"};
   }
 }
 
 /* Requests/Responses */
+message GetRaceRequest {
+  //This field will contain the id of the race.
+  int64 id = 1;
+}
+
+message GetRaceResponse {
+  Race race = 1;
+}
 
 // Request for ListRaces call.
 message ListRacesRequest {
