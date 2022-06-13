@@ -38,7 +38,7 @@ message GetRaceResponse {
 // Request for ListRaces call.
 message ListRacesRequest {
   ListRacesRequestFilter filter = 1;
-  string orderBy = 2; //Expecting order by in the format "orderBy":"advertised_start_time.desc"
+  string order_by = 2; //Expecting order by in the format "orderBy":"advertised_start_time.desc"
 }
 
 // Response to ListRaces call.
@@ -49,7 +49,7 @@ message ListRacesResponse {
 // Filter for listing races.
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
-  bool is_visible = 2;
+  bool visible_only = 2;
 }
 
 /* Resources */

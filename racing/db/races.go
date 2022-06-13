@@ -148,8 +148,8 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 	}
 
 	//filter to fetch the visible races.
-	if filter.IsVisible {
-		clauses = append(clauses, " visible = "+strconv.FormatBool(filter.IsVisible))
+	if filter.VisibleOnly {
+		clauses = append(clauses, " visible = "+strconv.FormatBool(filter.VisibleOnly))
 	}
 
 	if len(clauses) != 0 {
