@@ -20,6 +20,7 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter, orderBy string) ([]*racing.Race, error)
+	Get(raceIdRequest *racing.GetRaceRequest) (*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -42,6 +43,53 @@ func (r *racesRepo) Init() error {
 	})
 
 	return err
+}
+
+//function to process the race data. Can be used in List and Get
+func (r *racesRepo) formatRaceData(race *racing.Race, adTime time.Time) (*racing.Race, error) {
+
+	//var advertisedStart time.Time
+
+	ts, err := ptypes.TimestampProto(adTime)
+	if err != nil {
+		return nil, err
+	}
+
+	race.AdvertisedStartTime = ts
+
+	//Task3 - set status closed/open based on the past advertised_start_date time
+	dt := time.Now()
+	if dt.After(adTime) {
+		race.Status = "CLOSED"
+	} else {
+		race.Status = "OPEN"
+	}
+
+	return race, err
+}
+
+func (r *racesRepo) Get(raceIdRequest *racing.GetRaceRequest) (*racing.Race, error) {
+	var (
+		query string
+	)
+
+	query = getRaceQueries()[racesList]
+
+	//query = query + " where id =" + strconv.FormatInt(raceIdRequest.Id, 10)
+	row := r.db.QueryRow(query+" WHERE id=?", raceIdRequest.Id)
+
+	var race racing.Race
+	var advertisedStart time.Time
+
+	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return r.formatRaceData(&race, advertisedStart)
+
 }
 
 func (r *racesRepo) List(filter *racing.ListRacesRequestFilter, orderBy string) ([]*racing.Race, error) {
@@ -100,8 +148,8 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 	}
 
 	//filter to fetch the visible races.
-	if filter.IsVisible {
-		clauses = append(clauses, " visible = "+strconv.FormatBool(filter.IsVisible))
+	if filter.VisibleOnly {
+		clauses = append(clauses, " visible = "+strconv.FormatBool(filter.VisibleOnly))
 	}
 
 	if len(clauses) != 0 {
@@ -128,6 +176,7 @@ func (m *racesRepo) scanRaces(
 			return nil, err
 		}
 
+		//TODO: Need to be replaced with formatedRaceData func.
 		ts, err := ptypes.TimestampProto(advertisedStart)
 		if err != nil {
 			return nil, err
